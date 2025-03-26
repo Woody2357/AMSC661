@@ -1,3 +1,5 @@
+% run with dengwirda-mesh2d-99e0b24.
+
 theta = exp(i*2*pi/5);
 
 node = [                % list of xy "node" coordinates
