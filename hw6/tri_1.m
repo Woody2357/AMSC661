@@ -1,3 +1,5 @@
+% run with dengwirda-mesh2d-99e0b24.
+
 node = [                % list of xy "node" coordinates
     -1, 1                % outer square
     0, 1
