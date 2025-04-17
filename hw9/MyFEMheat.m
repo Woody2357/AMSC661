@@ -1,7 +1,7 @@
 %%
-function fem2d_heat(pts,tri,neumann,dirichlet)
 close all;
-fd = @p ddiff(dcircle(p,0,0,2),dcircle(p,0,0,1));
+addpath('./distmesh');
+fd = @(p) ddiff(dcircle(p,0,0,2),dcircle(p,0,0,1));
 [pts,tri]=distmesh2d(fd,@huniform,0.1,[-2,-2;2,2],[]);
 eps=1e-4;
 distance=sqrt(pts(:,1).^2+pts(:,2).^2);
@@ -39,11 +39,11 @@ for n = 2:N+1
             dt*myf(sum(pts(tri(j,:),:))/3,n*dt)/6;
     end
     % Neumann conditions
-    for j = 1 : size(neumann,1)
-       b(neumann(j,:)) = b(neumann(j,:)) + ...
-         norm(pts(neumann(j,1),:)-pts(neumann(j,2),:))*...
-         dt*myg(sum(pts(neumann(j,:),:))/2,n*dt)/2;
-    end
+    % for j = 1 : size(neumann,1)
+    %    b(neumann(j,:)) = b(neumann(j,:)) + ...
+    %      norm(pts(neumann(j,1),:)-pts(neumann(j,2),:))*...
+    %      dt*myg(sum(pts(neumann(j,:),:))/2,n*dt)/2;
+    % end
     % previous timestep
     % b=b+B*U(:,n-1);
     b=b+(-1/2*dt*A+B)*U(:,n-1);
@@ -51,12 +51,12 @@ for n = 2:N+1
     u = sparse(Npts,1);
     u(unique(dirichlet)) = myu_d(pts(unique(dirichlet),:),n*dt);
     % b=b-(dt*A+B)*u;
-    b=b-(-1/2*dt*A+B)*u;
+    b=b-(1/2*dt*A+B)*u;
     % Computation of the solution
     u(FreeNodes) = (1/2*dt*A(FreeNodes,FreeNodes)+ ...
             B(FreeNodes,FreeNodes))\b(FreeNodes);
     U(:,n) = u;
-end
+    t = n*dt;
 
 if t == 0.1
     figure;
@@ -75,12 +75,14 @@ if t == 1
     colorbar
     view(2)
     set(gca,'Fontsize',14);
+    figure;
     r=sqrt(pts(:,1).^2+pts(:,2).^2);
     [rsort,isort] = sort(r,'ascend');
     usort = u(isort);
     plot(rsort,usort,'LineWidth',2);
     hold on
     true = (1-rsort.^2)/4+3*log(rsort)/4/log(2);
+    plot(rsort,true,'LineWidth',2);
     legend('numerical','exact');
 end
 end
@@ -128,5 +130,5 @@ end
 
 %%
 function heatsource = myf(x,t)
-heatsource = zeros(size(x,1),1);
+heatsource = ones(size(x,1),1);
 end
